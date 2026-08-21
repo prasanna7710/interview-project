@@ -1,0 +1,20 @@
+Arun Kumar
+Email: arun.kumar@example.com
+Phone: +91 98765 43210
+
+Summary:
+Experienced Python and Java backend developer specialized in healthcare software architecture, relational databases, and microservices.
+
+Skills:
+Python, Java, Django, PostgreSQL, REST API, Redis, Docker, Microservices
+
+Experience:
+Senior Backend Developer - Healthcare Systems Ltd (2022 - 2025)
+• Engineered scalable REST APIs for electronic health records handling 50k requests daily.
+• Optimized PostgreSQL query performance reducing report generation time by 60%.
+
+Projects:
+Hospital Management System: Designed a multi-tenant hospital administration portal with Python and PostgreSQL to track patient records, bed allocation, and automated billing.
+
+Education:
+B.Tech Computer Science Engineering - Anna University (2018 - 2022)

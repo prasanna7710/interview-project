@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const resume_controller_1 = require("../controllers/resume.controller");
+const auth_1 = require("../middleware/auth");
+const upload_1 = require("../middleware/upload");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateToken);
+router.post('/upload', upload_1.uploadResume.single('resume'), resume_controller_1.uploadResumeFile);
+router.post('/:id/analyze', resume_controller_1.analyzeResume);
+router.get('/', resume_controller_1.getUserResumes);
+router.get('/:id', resume_controller_1.getResumeById);
+router.put('/:id', resume_controller_1.updateResumeData);
+exports.default = router;

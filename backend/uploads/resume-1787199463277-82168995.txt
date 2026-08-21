@@ -1,0 +1,20 @@
+Vikram Singh
+Email: vikram.singh@example.com
+Phone: +91 99887 76655
+
+Summary:
+Embedded Systems Architect specialized in C++, RTOS kernel programming, Rust, and autonomous drone robotics control.
+
+Skills:
+C++, Embedded Systems, RTOS, Rust, Linux, OpenCV, Linux Kernel, C
+
+Experience:
+Embedded Firmware Engineer - AeroDynamics Labs (2020 - 2026)
+• Developed hard real-time motor control loops on ARM Cortex-M microcontrollers.
+• Implemented Rust drivers for SPI and I2C IMU sensor telemetry modules.
+
+Projects:
+Autonomous Drone Controller: Developed real-time flight control firmware in C++ and RTOS for quadcopter drones with obstacle avoidance using OpenCV and low-latency sensor telemetry.
+
+Education:
+M.Tech Embedded Systems - IIT Bombay (2018 - 2020)

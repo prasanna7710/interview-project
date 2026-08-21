@@ -1,0 +1,19 @@
+{
+  "name": "interview-pro-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-style AI-powered Interview Preparation Platform",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "start": "concurrently \"npm run start --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix backend && npm run build --prefix frontend"
+  },
+  "dependencies": {
+    "tesseract.js": "^7.0.0"
+  }
+}
