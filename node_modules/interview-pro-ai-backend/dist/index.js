@@ -15,6 +15,7 @@ const resume_routes_1 = __importDefault(require("./routes/resume.routes"));
 const interview_routes_1 = __importDefault(require("./routes/interview.routes"));
 const analytics_routes_1 = __importDefault(require("./routes/analytics.routes"));
 const settings_routes_1 = __importDefault(require("./routes/settings.routes"));
+const coding_routes_1 = __importDefault(require("./routes/coding.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
@@ -24,7 +25,15 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // Serve uploaded files statically if needed
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
-// Health check endpoint
+// Root & Health check endpoints
+app.get('/', (_req, res) => {
+    res.json({
+        message: 'Interview Pro AI Backend API Server is running',
+        status: 'online',
+        healthCheck: '/api/health',
+        frontendUrl: 'http://localhost:3000'
+    });
+});
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString(), name: 'Interview Pro AI API' });
 });
@@ -35,13 +44,15 @@ app.use('/api/resumes', resume_routes_1.default);
 app.use('/api/interviews', interview_routes_1.default);
 app.use('/api/analytics', analytics_routes_1.default);
 app.use('/api/settings', settings_routes_1.default);
+app.use('/api/coding', coding_routes_1.default);
 // Global error handler
 app.use(errorHandler_1.errorHandler);
-// Start server
-async function startServer() {
-    await (0, database_1.connectDB)();
+// Connect DB on start
+(0, database_1.connectDB)().catch((err) => console.error('DB connection error:', err));
+// Start server locally if not running in Vercel serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`🚀 Interview Pro AI Backend running on http://localhost:${PORT}`);
     });
 }
-startServer();
+exports.default = app;

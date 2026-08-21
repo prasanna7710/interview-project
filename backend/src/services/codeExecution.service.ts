@@ -197,7 +197,7 @@ function transpileJavaToJS(javaCode: string): string {
     .replace(/import\s+java\..*?;/g, '')
     .replace(/public\s+class\s+\w+\s*\{/g, '')
     .replace(/public\s+(?:static\s+)?[\w\[\]<>]+\s+solution\s*\((.*?)\)/g, (match, p1) => {
-      const params = p1.split(',').map(p => p.trim().split(/\s+/).pop()).join(', ');
+      const params = p1.split(',').map((p: string) => p.trim().split(/\s+/).pop()).join(', ');
       return `function solution(${params})`;
     })
     .replace(/new\s+int\s*\[\]\s*\{(.*?)\}/g, '[$1]')
@@ -217,19 +217,19 @@ function transpileCppToJS(cppCode: string): string {
     .replace(/#include\s+<.*?>/g, '')
     .replace(/using\s+namespace\s+std;/g, '')
     .replace(/vector<int>\s+solution\((.*?)\)/g, (match, p1) => {
-      const params = p1.split(',').map(p => p.trim().split(/[\s&]+/).pop()).join(', ');
+      const params = p1.split(',').map((p: string) => p.trim().split(/[\s&]+/).pop()).join(', ');
       return `function solution(${params})`;
     })
     .replace(/int\s+solution\((.*?)\)/g, (match, p1) => {
-      const params = p1.split(',').map(p => p.trim().split(/[\s&]+/).pop()).join(', ');
+      const params = p1.split(',').map((p: string) => p.trim().split(/[\s&]+/).pop()).join(', ');
       return `function solution(${params})`;
     })
     .replace(/bool\s+solution\((.*?)\)/g, (match, p1) => {
-      const params = p1.split(',').map(p => p.trim().split(/[\s&]+/).pop()).join(', ');
+      const params = p1.split(',').map((p: string) => p.trim().split(/[\s&]+/).pop()).join(', ');
       return `function solution(${params})`;
     })
     .replace(/string\s+solution\((.*?)\)/g, (match, p1) => {
-      const params = p1.split(',').map(p => p.trim().split(/[\s&]+/).pop()).join(', ');
+      const params = p1.split(',').map((p: string) => p.trim().split(/[\s&]+/).pop()).join(', ');
       return `function solution(${params})`;
     })
     .replace(/\((?:int|double|float|long|size_t)\)/g, '')
@@ -243,11 +243,11 @@ function transpileCToJS(cCode: string): string {
   return cCode
     .replace(/#include\s+<.*?>/g, '')
     .replace(/int\*\s+solution\((.*?)\)/g, (match, p1) => {
-      const params = p1.split(',').map(p => p.trim().split(/\s+/).pop()).join(', ');
+      const params = p1.split(',').map((p: string) => p.trim().split(/\s+/).pop()).join(', ');
       return `function solution(${params})`;
     })
     .replace(/int\s+solution\((.*?)\)/g, (match, p1) => {
-      const params = p1.split(',').map(p => p.trim().split(/\s+/).pop()).join(', ');
+      const params = p1.split(',').map((p: string) => p.trim().split(/\s+/).pop()).join(', ');
       return `function solution(${params})`;
     })
     .replace(/\bint\s+/g, 'let ')

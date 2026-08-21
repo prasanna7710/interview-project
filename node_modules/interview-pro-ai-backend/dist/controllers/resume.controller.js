@@ -15,6 +15,9 @@ async function uploadResumeFile(req, res) {
         if (!file) {
             return res.status(400).json({ error: 'No resume file uploaded.' });
         }
+        console.log(`[FILE RECEIVED] ${file.originalname}`);
+        console.log(`[FILE TYPE] ${file.mimetype}`);
+        console.log(`[FILE SIZE] ${file.size} bytes`);
         // Save basic record
         const resume = await database_1.prisma.resume.create({
             data: {
@@ -48,17 +51,34 @@ async function analyzeResume(req, res) {
         }
         // Step 1: Extract Text
         let rawText = resume.rawText;
+        let pagesCount = 1;
+        console.log(`[TEXT EXTRACTION STARTED] ${resume.fileName}`);
         if (!rawText || rawText.trim().length === 0) {
             try {
-                rawText = await (0, resume_service_1.extractTextFromFile)(resume.filePath, resume.fileType);
+                const extraction = await (0, resume_service_1.extractTextFromFile)(resume.filePath, resume.fileType, resume.fileName);
+                rawText = extraction.text;
+                pagesCount = extraction.pagesCount;
             }
             catch (err) {
-                console.warn('Text extraction error, using fallback:', err.message);
-                rawText = `Resume file: ${resume.fileName}. Contains technical skills and software engineering experience.`;
+                console.error(`[RESUME EXTRACTION FAILED] filename="${resume.fileName}" | error=${err.message}`);
+                return res.status(400).json({
+                    error: 'Unable to read this resume. Please upload a text-based PDF/DOCX or a clearer scanned document.',
+                });
             }
         }
+        console.log(`[TEXT EXTRACTION RESULT] extracted character count: ${rawText ? rawText.length : 0}`);
+        // Print detailed extraction summary
+        console.log(`[RESUME EXTRACTION]\nfilename: ${resume.fileName}\nfile type: ${resume.fileType}\nfile size: ${resume.fileSize} bytes\nnumber of pages: ${pagesCount}\nextracted text character count: ${rawText ? rawText.length : 0}`);
+        // Strict validation: Do NOT proceed if text is empty or unreadable
+        if (!rawText || rawText.trim().length < 15) {
+            return res.status(400).json({
+                error: 'Unable to read this resume. Please upload a text-based PDF/DOCX or a clearer scanned document.',
+            });
+        }
         // Step 2: AI Parsing
-        const parsedData = await (0, ai_service_1.parseResumeWithAI)(rawText);
+        console.log(`[AI ANALYSIS STARTED] ${id}`);
+        const parsedData = await (0, ai_service_1.parseResumeWithAI)(rawText, id, resume.fileName);
+        console.log(`[AI ANALYSIS COMPLETED] candidateName: "${parsedData.candidateName || 'N/A'}" | skills: ${parsedData.skills.length} | projects: ${parsedData.projects.length}`);
         // Clean old relational records if re-analyzing
         await database_1.prisma.resumeSkill.deleteMany({ where: { resumeId: id } });
         await database_1.prisma.resumeProject.deleteMany({ where: { resumeId: id } });
@@ -71,6 +91,9 @@ async function analyzeResume(req, res) {
                 rawText,
                 isParsed: true,
                 parsedAt: new Date(),
+                candidateName: parsedData.candidateName || null,
+                email: parsedData.email || null,
+                phone: parsedData.phone || null,
                 summary: parsedData.summary,
                 skills: {
                     create: parsedData.skills.map(s => ({

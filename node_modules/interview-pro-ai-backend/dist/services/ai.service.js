@@ -20,7 +20,7 @@ async function callLLM(prompt, systemPrompt) {
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: prompt },
                     ],
-                    temperature: 0.7,
+                    temperature: 0.2,
                     response_format: { type: 'json_object' },
                 }),
             });
@@ -29,108 +29,285 @@ async function callLLM(prompt, systemPrompt) {
                 return data.choices[0].message.content;
             }
             else {
-                console.warn('OpenAI API call failed, falling back to smart engine:', await response.text());
+                console.warn('[AI] OpenAI API call failed, using local extraction engine:', await response.text());
             }
         }
         catch (err) {
-            console.warn('OpenAI request error, falling back to smart engine:', err);
+            console.warn('[AI] OpenAI request error, using local extraction engine:', err);
         }
     }
-    return ''; // Trigger smart fallback
+    return ''; // Trigger local non-mock extraction engine
 }
-async function parseResumeWithAI(rawText) {
-    const systemPrompt = `You are an expert HR and Technical Recruiter AI parser. Extract structured information from the resume text provided. Output MUST be valid JSON with keys: summary, skills (array of {name, category, level}), projects (array of {title, description, technologies, link}), experiences (array of {company, role, duration, responsibilities}), educations (array of {degree, institution, year, details}).`;
+async function parseResumeWithAI(rawText, resumeId, filename) {
+    console.log(`[AI RESUME INPUT]\nresumeId: ${resumeId || 'N/A'}\nfilename: ${filename || 'N/A'}\ntext length: ${rawText.length}\nfirst 200 characters: ${JSON.stringify(rawText.slice(0, 200))}`);
+    const systemPrompt = `You are a resume analysis system.
+Analyze ONLY the resume text supplied in the request.
+Do not use sample resumes.
+Do not use information from previous users.
+Do not invent skills.
+Do not invent projects.
+Do not invent education.
+Do not invent companies.
+Do not invent experience.
+If information is not present in the resume, return an empty value.
+
+Output MUST be a valid JSON object with keys:
+- "name": string or null
+- "email": string or null
+- "phone": string or null
+- "summary": string
+- "skills": array of { "name": string, "category": string, "level": string }
+- "education": array of { "degree": string, "institution": string, "year": string, "details": string }
+- "experience": array of { "company": string, "role": string, "duration": string, "responsibilities": array of string }
+- "projects": array of { "title": string, "description": string, "technologies": array of string, "link": string }
+- "certifications": array of string
+- "languages": array of string
+- "technologies": array of string`;
     const rawJson = await callLLM(rawText, systemPrompt);
+    let result;
     if (rawJson) {
         try {
             const parsed = JSON.parse(rawJson);
-            return {
-                summary: parsed.summary || 'Candidate profile extracted from resume.',
-                skills: parsed.skills || [],
-                projects: parsed.projects || [],
-                experiences: parsed.experiences || [],
-                educations: parsed.educations || [],
+            result = {
+                candidateName: parsed.name || parsed.candidateName || undefined,
+                email: parsed.email || undefined,
+                phone: parsed.phone || undefined,
+                summary: parsed.summary || rawText.slice(0, 300),
+                skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+                projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+                experiences: Array.isArray(parsed.experience) ? parsed.experience : (Array.isArray(parsed.experiences) ? parsed.experiences : []),
+                educations: Array.isArray(parsed.education) ? parsed.education : (Array.isArray(parsed.educations) ? parsed.educations : []),
             };
         }
         catch (e) {
-            console.error('Failed to parse LLM JSON output for resume analysis');
+            console.error('[AI] Failed to parse LLM JSON output for resume analysis, falling back to local extraction.');
+            result = smartResumeFallback(rawText);
         }
     }
-    // Smart Fallback Parser based on Regex & Keyword Matching
-    return smartResumeFallback(rawText);
+    else {
+        result = smartResumeFallback(rawText);
+    }
+    return result;
 }
+/**
+ * Zero-mock local resume extraction engine.
+ * Parses the ACTUAL content of the resume using regex, NLP section segmentation, and keyword matching.
+ * Never outputs hardcoded fake names, companies, projects, or educations.
+ */
 function smartResumeFallback(rawText) {
     const text = rawText || '';
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-    const commonSkills = [
-        'JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'Java', 'C++', 'HTML', 'CSS',
-        'SQL', 'PostgreSQL', 'MongoDB', 'Git', 'Docker', 'AWS', 'REST API', 'Express', 'Tailwind',
-        'Communication', 'Problem Solving', 'Teamwork', 'Leadership', 'Agile', 'Scrum'
-    ];
-    const foundSkills = commonSkills.filter(skill => {
-        const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return new RegExp(`${escaped}`, 'i').test(text);
-    });
-    const skillsList = foundSkills.length > 0
-        ? foundSkills.map(s => ({ name: s, category: 'Technical', level: 'Intermediate' }))
-        : [
-            { name: 'JavaScript', category: 'Frontend', level: 'Intermediate' },
-            { name: 'React', category: 'Frontend', level: 'Intermediate' },
-            { name: 'Python', category: 'Backend', level: 'Intermediate' },
-            { name: 'SQL', category: 'Database', level: 'Intermediate' },
-            { name: 'Problem Solving', category: 'Soft Skills', level: 'Advanced' },
-        ];
-    // Look for project mentions
-    const projectMatches = [];
-    const projectIdx = lines.findIndex(l => /project/i.test(l));
-    if (projectIdx !== -1 && lines[projectIdx + 1]) {
-        projectMatches.push({
-            title: lines[projectIdx + 1] || 'Web Application Project',
-            description: lines[projectIdx + 2] || 'A full-stack application built during academic/professional practice.',
-            technologies: skillsList.slice(0, 3).map(s => s.name),
-        });
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    // 1. Extract Candidate Contact Info
+    let candidateName = undefined;
+    let email = undefined;
+    let phone = undefined;
+    // Email regex
+    const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i);
+    if (emailMatch)
+        email = emailMatch[0];
+    // Phone regex
+    const phoneMatch = text.match(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
+    if (phoneMatch)
+        phone = phoneMatch[0];
+    // Candidate Name extraction heuristic
+    const nameLineMatch = text.match(/(?:Name|Candidate Name|Full Name):\s*([^\n\r,]+)/i);
+    if (nameLineMatch && nameLineMatch[1].trim().length > 1) {
+        candidateName = nameLineMatch[1].trim();
     }
     else {
-        projectMatches.push({
-            title: 'Full-Stack Recommendation System',
-            description: 'Developed an intelligent web system using Python backend and React frontend.',
-            technologies: ['Python', 'React', 'REST API', 'SQL'],
-        }, {
-            title: 'Portfolio & Analytics Dashboard',
-            description: 'Created a responsive analytics dashboard with secure authentication.',
-            technologies: ['TypeScript', 'Node.js', 'PostgreSQL'],
+        // Look at first 5 non-empty lines for a line that looks like a person's name
+        for (let i = 0; i < Math.min(lines.length, 5); i++) {
+            const line = lines[i];
+            if (!line.includes('@') &&
+                !line.includes('|') &&
+                !line.match(/resume|curriculum|cv|contact|email|phone|profile|developer|engineer|intern/i) &&
+                line.length >= 2 &&
+                line.length <= 40 &&
+                /^[A-Za-z\s.'-]+$/.test(line)) {
+                candidateName = line;
+                break;
+            }
+        }
+    }
+    if (!candidateName && email) {
+        const handle = email.split('@')[0].replace(/[0-9._%+-]/g, ' ').trim();
+        if (handle.length > 2) {
+            candidateName = handle.charAt(0).toUpperCase() + handle.slice(1);
+        }
+    }
+    // 2. Extract Skills from actual text
+    const techDictionary = [
+        'JavaScript', 'TypeScript', 'React', 'Node.js', 'Express', 'Python', 'Java', 'C++', 'C#', 'Go', 'Rust',
+        'Ruby', 'PHP', 'HTML', 'CSS', 'Tailwind', 'Bootstrap', 'Sass', 'SQL', 'PostgreSQL', 'MySQL', 'SQLite',
+        'MongoDB', 'Redis', 'Docker', 'Kubernetes', 'AWS', 'GCP', 'Azure', 'Git', 'GitHub', 'REST API', 'GraphQL',
+        'gRPC', 'Microservices', 'Django', 'Flask', 'FastAPI', 'Spring Boot', 'Next.js', 'Vite', 'Vue', 'Angular',
+        'Machine Learning', 'Deep Learning', 'PyTorch', 'TensorFlow', 'Pandas', 'NumPy', 'Scikit-learn', 'OpenCV',
+        'NLP', 'Linux', 'Bash', 'CI/CD', 'Agile', 'Scrum', 'System Design', 'Communication', 'Problem Solving',
+        'Leadership', 'Teamwork', 'Unit Testing', 'Jest', 'Cypress', 'Playwright', 'RTOS', 'Embedded Systems'
+    ];
+    const matchedSkillsSet = new Set();
+    techDictionary.forEach(skill => {
+        const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?:^|[^a-zA-Z0-9_])${escaped}(?:$|[^a-zA-Z0-9_])`, 'i');
+        if (regex.test(text)) {
+            matchedSkillsSet.add(skill);
+        }
+    });
+    // Check explicit "Skills:" line in text
+    const skillsHeaderIdx = lines.findIndex(l => /^(skills|technical skills|technologies|core competencies):?/i.test(l));
+    if (skillsHeaderIdx !== -1 && lines[skillsHeaderIdx + 1]) {
+        const lineContent = lines[skillsHeaderIdx].includes(':')
+            ? lines[skillsHeaderIdx].split(':')[1]
+            : lines[skillsHeaderIdx + 1];
+        if (lineContent) {
+            lineContent.split(/[,|•;]/).forEach(s => {
+                const cleaned = s.trim();
+                if (cleaned.length > 1 && cleaned.length < 30) {
+                    matchedSkillsSet.add(cleaned);
+                }
+            });
+        }
+    }
+    const skillsList = Array.from(matchedSkillsSet).map(s => ({
+        name: s,
+        category: 'Technical',
+        level: 'Intermediate',
+    }));
+    // 3. Segment Sections (Projects, Experiences, Educations)
+    const sections = {
+        projects: [],
+        experience: [],
+        education: [],
+        summary: [],
+    };
+    let currentSection = 'summary';
+    lines.forEach(line => {
+        const lower = line.toLowerCase();
+        if (/^(projects|personal projects|key projects|academic projects)/i.test(lower)) {
+            currentSection = 'projects';
+        }
+        else if (/^(experience|work experience|employment|professional experience|work history)/i.test(lower)) {
+            currentSection = 'experience';
+        }
+        else if (/^(education|academic background|qualifications)/i.test(lower)) {
+            currentSection = 'education';
+        }
+        else if (/^(summary|profile|about me|objective)/i.test(lower)) {
+            currentSection = 'summary';
+        }
+        else {
+            sections[currentSection].push(line);
+        }
+    });
+    // 4. Extract Projects from actual section lines
+    const projectsList = [];
+    if (sections.projects.length > 0) {
+        let currentTitle = '';
+        let currentDesc = [];
+        sections.projects.forEach(pLine => {
+            if (pLine.startsWith('•') || pLine.startsWith('-') || pLine.startsWith('*')) {
+                currentDesc.push(pLine.replace(/^[•\-\*]\s*/, ''));
+            }
+            else if (pLine.includes(':')) {
+                if (currentTitle) {
+                    projectsList.push({
+                        title: currentTitle,
+                        description: currentDesc.join(' ') || currentTitle,
+                        technologies: skillsList.slice(0, 3).map(s => s.name),
+                    });
+                    currentDesc = [];
+                }
+                const parts = pLine.split(':');
+                currentTitle = parts[0].trim();
+                if (parts[1])
+                    currentDesc.push(parts[1].trim());
+            }
+            else {
+                if (!currentTitle) {
+                    currentTitle = pLine;
+                }
+                else {
+                    currentDesc.push(pLine);
+                }
+            }
+        });
+        if (currentTitle) {
+            projectsList.push({
+                title: currentTitle,
+                description: currentDesc.join(' ') || currentTitle,
+                technologies: skillsList.slice(0, 3).map(s => s.name),
+            });
+        }
+    }
+    // 5. Extract Experiences from actual section lines
+    const experiencesList = [];
+    if (sections.experience.length > 0) {
+        let currentRole = '';
+        let currentCompany = '';
+        let currentDuration = '';
+        let bullets = [];
+        sections.experience.forEach(eLine => {
+            if (eLine.startsWith('•') || eLine.startsWith('-') || eLine.startsWith('*')) {
+                bullets.push(eLine.replace(/^[•\-\*]\s*/, ''));
+            }
+            else {
+                if (currentRole || currentCompany) {
+                    experiencesList.push({
+                        company: currentCompany || 'Company / Organization',
+                        role: currentRole || 'Position',
+                        duration: currentDuration || '',
+                        responsibilities: bullets.length > 0 ? bullets : [currentRole],
+                    });
+                    bullets = [];
+                }
+                const parts = eLine.split(/[-–|]/);
+                currentRole = parts[0]?.trim() || eLine;
+                currentCompany = parts[1]?.trim() || '';
+                currentDuration = parts[2]?.trim() || '';
+            }
+        });
+        if (currentRole || currentCompany) {
+            experiencesList.push({
+                company: currentCompany || 'Company / Organization',
+                role: currentRole || 'Position',
+                duration: currentDuration || '',
+                responsibilities: bullets.length > 0 ? bullets : [currentRole],
+            });
+        }
+    }
+    // 6. Extract Educations from actual section lines
+    const educationsList = [];
+    if (sections.education.length > 0) {
+        sections.education.forEach(edLine => {
+            if (edLine.length > 3) {
+                const parts = edLine.split(/[-–|]/);
+                educationsList.push({
+                    degree: parts[0]?.trim() || edLine,
+                    institution: parts[1]?.trim() || 'Institution',
+                    year: parts[2]?.trim() || '',
+                });
+            }
         });
     }
+    // 7. Executive Summary from actual text
+    const summaryText = sections.summary.slice(0, 4).join(' ') || text.slice(0, 300) || 'Candidate resume parsed successfully.';
     return {
-        summary: text.slice(0, 300) || 'Motivated software engineer with experience building web applications and solving complex technical challenges.',
+        candidateName,
+        email,
+        phone,
+        summary: summaryText,
         skills: skillsList,
-        projects: projectMatches,
-        experiences: [
-            {
-                company: 'Tech Solutions Inc.',
-                role: 'Software Engineering Intern',
-                duration: '2023 - Present',
-                responsibilities: [
-                    'Assisted in developing web application features and API endpoints.',
-                    'Participated in code reviews, bug fixes, and agile standups.',
-                ],
-            },
-        ],
-        educations: [
-            {
-                degree: 'Bachelor of Science in Computer Science / Engineering',
-                institution: 'University / Institute of Technology',
-                year: '2020 - 2024',
-                details: 'Relevant Coursework: Data Structures, Web Development, Database Systems, Software Engineering.',
-            },
-        ],
+        projects: projectsList,
+        experiences: experiencesList,
+        educations: educationsList,
     };
 }
 async function generateInterviewQuestions(type, difficulty, count, resumeData) {
-    const skillsStr = resumeData?.skills.map(s => s.name).join(', ') || 'Software Development, Web Apps, JavaScript, SQL';
-    const projectsStr = resumeData?.projects.map(p => `${p.title}: ${p.description}`).join(' | ') || 'Web development project';
-    const systemPrompt = `You are a top-tier tech interviewer conducting a ${type} interview at ${difficulty} level.
-Generate exactly ${count} realistic, professional interview questions based on the candidate's resume.
+    const candidateName = resumeData?.candidateName || 'Candidate';
+    const skillsStr = resumeData?.skills.map(s => s.name).join(', ') || 'Software Development';
+    const projectsStr = resumeData?.projects.map(p => `${p.title}: ${p.description}`).join(' | ') || 'Projects listed on resume';
+    const systemPrompt = `You are a top-tier tech interviewer conducting a ${type} interview at ${difficulty} level for candidate ${candidateName}.
+Generate exactly ${count} realistic, professional interview questions based strictly on the candidate's resume content.
 Candidate Skills: ${skillsStr}
 Candidate Projects: ${projectsStr}
 
@@ -144,120 +321,136 @@ Output MUST be a JSON object with key "questions" containing an array of objects
             }
         }
         catch (e) {
-            console.error('Failed to parse question generation JSON output');
+            console.error('[AI] Failed to parse question generation JSON output');
         }
     }
     return generateSmartQuestionsFallback(type, difficulty, count, resumeData);
 }
 function generateSmartQuestionsFallback(type, difficulty, count, resumeData) {
-    const skills = resumeData?.skills.map(s => s.name) || ['JavaScript', 'React', 'Python', 'SQL'];
+    const candidateName = resumeData?.candidateName ? `${resumeData.candidateName}` : 'your background';
+    const skills = resumeData?.skills.map(s => s.name) || [];
     const projects = resumeData?.projects || [];
     const primarySkill = skills[0] || 'software development';
-    const secondarySkill = skills[1] || 'databases';
-    const projectTitle = projects[0]?.title || 'your recent technical project';
-    const templates = {
-        Technical: [
-            {
-                questionText: `You mentioned experience with ${primarySkill}. Explain the core concepts of ${primarySkill} and how you apply them in real-world scenarios.`,
-                category: 'Core Concepts',
-                hints: 'Discuss key features, architecture, and common best practices.',
-            },
-            {
-                questionText: `Walk me through how you handled data persistence or backend communication in ${projectTitle}.`,
-                category: 'Architecture & System Design',
-                hints: 'Mention API design, error handling, and performance considerations.',
-            },
-            {
-                questionText: `How do you optimize performance and state management when working with ${secondarySkill}?`,
-                category: 'Performance Optimization',
-                hints: 'Cover caching, memory management, and code structuring.',
-            },
-            {
-                questionText: `Describe a challenging bug or technical hurdle you encountered while building ${projectTitle} and how you debugged it.`,
-                category: 'Debugging & Problem Solving',
-                hints: 'Use the STAR method (Situation, Task, Action, Result).',
-            },
-            {
-                questionText: `What security practices do you implement when designing user authentication and data access control?`,
-                category: 'Security & Best Practices',
-                hints: 'Talk about password hashing, JWTs, CORS, and sanitized inputs.',
-            },
-            {
-                questionText: `How do write automated tests or verify your code quality before deploying to production?`,
-                category: 'Testing & Reliability',
-                hints: 'Mention unit tests, integration testing, and code review processes.',
-            },
-        ],
-        HR: [
-            {
-                questionText: 'Tell me about yourself, your background, and why you are passionate about pursuing a career in software engineering.',
-                category: 'Introduction',
-                hints: 'Keep it concise (1-2 mins), highlighting key milestones and technical enthusiasm.',
-            },
-            {
-                questionText: 'Where do you see your technical skills evolving over the next 2-3 years?',
-                category: 'Career Goals',
-                hints: 'Focus on growth mindset, learning new tech, and contributing value.',
-            },
-            {
-                questionText: 'Describe a situation where you had to learn a brand new framework or technology under a tight deadline.',
-                category: 'Adaptability',
-                hints: 'Highlight documentation reading, building quick POCs, and staying focused.',
-            },
-            {
-                questionText: 'Why are you interested in this role and what sets your approach apart from other candidates?',
-                category: 'Motivation & Fit',
-                hints: 'Connect your personal projects and problem-solving mindset to team value.',
-            },
-            {
-                questionText: 'How do you handle receiving constructive feedback during code reviews or team evaluations?',
-                category: 'Growth Mindset',
-                hints: 'Demonstrate humility, openness, and active implementation of feedback.',
-            },
-        ],
-        Behavioral: [
-            {
-                questionText: 'Describe a time when you experienced a conflict or disagreement with a team member. How did you resolve it?',
-                category: 'Conflict Resolution',
-                hints: 'Focus on empathetic listening, objective compromise, and team alignment.',
-            },
-            {
-                questionText: 'Give an example of a project where requirements changed midway through implementation. How did you respond?',
-                category: 'Flexibility & Execution',
-                hints: 'Discuss prioritizing tasks, updating stakeholders, and refactoring cleanly.',
-            },
-            {
-                questionText: 'Tell me about a time you failed or made a mistake on a technical task. What did you learn from it?',
-                category: 'Accountability & Learning',
-                hints: 'Be honest, take ownership, and emphasize systemic fixes preventing repeat errors.',
-            },
-            {
-                questionText: 'How do you prioritize competing deadlines when managing multiple technical tasks or courses?',
-                category: 'Time Management',
-                hints: 'Discuss task breakdown, estimates, and transparent communication.',
-            },
-        ],
-        Project: [
-            {
-                questionText: `In your project "${projectTitle}", explain your architectural choices and technology stack selection.`,
+    const secondarySkill = skills[1] || skills[0] || 'problem solving';
+    const projectTitle = projects[0]?.title || (skills[0] ? `${skills[0]} implementation` : 'your technical project');
+    const questions = [];
+    if (type === 'Technical') {
+        if (skills.length > 0) {
+            questions.push({
+                questionText: `Based on your resume experience with ${primarySkill}, explain how you structure core concepts of ${primarySkill} in scalable applications.`,
+                category: 'Technical Core',
+                hints: `Discuss architecture, best practices, and performance when using ${primarySkill}.`,
+            });
+        }
+        if (projects.length > 0) {
+            questions.push({
+                questionText: `Walk me through your project "${projectTitle}". What technical architectural decisions did you make, and how did you handle data persistence or state management?`,
                 category: 'Project Architecture',
-                hints: 'Explain why you chose specific tools and the trade-offs involved.',
-            },
-            {
-                questionText: `What was your individual role and biggest contribution to ${projectTitle}?`,
-                category: 'Individual Ownership',
-                hints: 'Detail specific features, API routes, or UI components you engineered.',
-            },
-            {
-                questionText: `If you had 2 extra weeks to improve ${projectTitle}, what features or optimizations would you add next?`,
-                category: 'Future Improvements',
-                hints: 'Discuss scalability, UX polish, caching, or monitoring.',
-            },
-        ],
-    };
-    const selectedTypeQuestions = templates[type] || templates.Technical;
-    const pool = [...selectedTypeQuestions, ...templates.Behavioral, ...templates.HR];
-    return pool.slice(0, count);
+                hints: 'Cover backend/frontend trade-offs, API design, and error handling.',
+            });
+        }
+        else {
+            questions.push({
+                questionText: `How do you optimize performance and manage application state when building solutions using ${secondarySkill}?`,
+                category: 'Performance & State',
+                hints: 'Mention caching, data structures, and memory efficiency.',
+            });
+        }
+        if (skills.length > 1) {
+            questions.push({
+                questionText: `Compare your experience working with ${primarySkill} versus ${secondarySkill}. In what scenarios would you choose one over the other?`,
+                category: 'Tool & Tech Evaluation',
+                hints: 'Focus on trade-offs, ecosystem, speed of development, and system suitability.',
+            });
+        }
+        questions.push({
+            questionText: `Describe a complex technical bug or production edge case you encountered while working with ${primarySkill} and how you diagnosed it.`,
+            category: 'Debugging & Diagnostics',
+            hints: 'Use the STAR method (Situation, Task, Action, Result).',
+        });
+        questions.push({
+            questionText: `What security practices, authentication protocols, or input validation measures do you integrate into your ${primarySkill} applications?`,
+            category: 'Security & Quality',
+            hints: 'Mention CORS, sanitization, JWTs, or encrypted data handling.',
+        });
+    }
+    else if (type === 'Project') {
+        projects.forEach((p, idx) => {
+            questions.push({
+                questionText: `For your project "${p.title}", explain your specific individual contributions and technical stack choices (${p.technologies.join(', ') || primarySkill}).`,
+                category: 'Project Ownership',
+                hints: 'Detail specific components or API endpoints you built.',
+            });
+            questions.push({
+                questionText: `What was the most challenging technical constraint or performance bottleneck you faced while building "${p.title}"?`,
+                category: 'Problem Solving',
+                hints: 'Explain the obstacle and your exact resolution step.',
+            });
+        });
+        if (questions.length < count) {
+            questions.push({
+                questionText: `If you were tasked with scaling "${projectTitle}" to handle 10x user traffic, what infrastructure or database refactoring would you perform?`,
+                category: 'Scalability',
+                hints: 'Discuss caching layers, indexing, microservices, or load balancers.',
+            });
+        }
+    }
+    else if (type === 'HR' || type === 'Behavioral') {
+        questions.push({
+            questionText: `Hello! I reviewed your resume featuring skills like ${skills.slice(0, 3).join(', ') || 'technology'}. Could you give an introduction highlighting your career journey?`,
+            category: 'Introduction',
+            hints: 'Keep it concise (1-2 minutes) and highlight key milestones.',
+        });
+        questions.push({
+            questionText: `Describe a situation in your work on ${projectTitle} where project requirements changed under a tight deadline. How did you adapt?`,
+            category: 'Adaptability',
+            hints: 'Focus on priority alignment, communication, and clear execution.',
+        });
+        questions.push({
+            questionText: `Tell me about a time you experienced a technical disagreement with a colleague or peer. How did you resolve it?`,
+            category: 'Collaboration',
+            hints: 'Emphasize empathetic listening and objective technical compromise.',
+        });
+        questions.push({
+            questionText: `What is a technology or framework outside your comfort zone that you recently learned, and how did you approach mastering it?`,
+            category: 'Growth Mindset',
+            hints: 'Discuss reading documentation, building proof-of-concepts, and asking questions.',
+        });
+    }
+    else {
+        // Mixed
+        questions.push({
+            questionText: `Welcome! Looking at your background in ${skills.slice(0, 3).join(', ') || 'software development'}, walk me through your technical profile and strengths.`,
+            category: 'Overview',
+            hints: 'Highlight core technical strengths and experience.',
+        });
+        if (projects[0]) {
+            questions.push({
+                questionText: `In "${projects[0].title}", how did you verify code quality, handle error cases, and test your features?`,
+                category: 'Code Quality & Testing',
+                hints: 'Mention unit tests, integration testing, or manual edge-case testing.',
+            });
+        }
+        questions.push({
+            questionText: `Explain a deep-dive technical concept from ${primarySkill} to a non-technical stakeholder.`,
+            category: 'Technical Communication',
+            hints: 'Use clear analogies without sacrificing technical accuracy.',
+        });
+        questions.push({
+            questionText: `Tell me about a time a technical design didn't go as planned. What went wrong and what did you learn?`,
+            category: 'Accountability & Learning',
+            hints: 'Be honest and explain how you prevented a recurrence.',
+        });
+    }
+    // Fallback filler if pool is small
+    while (questions.length < count) {
+        questions.push({
+            questionText: `How do you approach automated testing and continuous integration when shipping software built with ${primarySkill}?`,
+            category: 'Engineering Best Practices',
+            hints: 'Cover CI/CD pipelines, unit testing, and code reviews.',
+        });
+    }
+    return questions.slice(0, count);
 }
 async function generateFollowUpQuestion(questionText, userAnswer, resumeData) {
     const systemPrompt = `You are a professional AI interviewer. The candidate just answered your question.
@@ -327,7 +520,7 @@ Output MUST be valid JSON with keys:
             }
         }
         catch (e) {
-            console.error('Failed to parse answer evaluation JSON');
+            console.error('[AI] Failed to parse answer evaluation JSON');
         }
     }
     return evaluateAnswerSmartFallback(questionText, userAnswer);
@@ -363,7 +556,7 @@ function evaluateAnswerSmartFallback(questionText, userAnswer) {
     communication = Math.min(Math.max(communication, 40), 98);
     confidence = Math.min(Math.max(confidence, 40), 98);
     relevance = Math.min(Math.max(relevance, 40), 98);
-    // Weighted overall calculation: Technical 30%, Quality 25%, Comm 20%, Confidence 15%, Relevance 10%
+    // Weighted overall calculation
     const overall = Math.round(technical * 0.30 +
         quality * 0.25 +
         communication * 0.20 +

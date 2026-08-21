@@ -52,12 +52,14 @@ app.use('/api/coding', codingRoutes);
 // Global error handler
 app.use(errorHandler);
 
-// Start server
-async function startServer() {
-  await connectDB();
+// Connect DB on start
+connectDB().catch((err) => console.error('DB connection error:', err));
+
+// Start server locally if not running in Vercel serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`🚀 Interview Pro AI Backend running on http://localhost:${PORT}`);
   });
 }
 
-startServer();
+export default app;

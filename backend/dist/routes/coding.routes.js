@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const coding_controller_1 = require("../controllers/coding.controller");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateToken);
+router.post('/setup', coding_controller_1.setupCodingTest);
+router.get('/history', coding_controller_1.getCodingHistory);
+router.get('/tests/:id', coding_controller_1.getCodingTest);
+router.post('/tests/:testId/run', coding_controller_1.runCode);
+router.post('/tests/:testId/submit-question', coding_controller_1.submitQuestion);
+router.post('/tests/:testId/finish', coding_controller_1.finishCodingTest);
+exports.default = router;
