@@ -1,2 +1,14 @@
 node_modules
 .vercel
+dist
+.env
+.env.*
+.env.local
+!.env.example
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+*.db
+*.db-journal
+*.db.bak
