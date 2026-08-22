@@ -5,14 +5,12 @@ import { useToast } from '../contexts/ToastContext';
 import { api } from '../services/api';
 import { Interview } from '../types';
 import {
-  History,
   Search,
   FileText,
   ChevronRight,
   Video,
   Loader2,
   Code,
-  CheckCircle2,
 } from 'lucide-react';
 
 export const InterviewHistoryPage: React.FC = () => {
@@ -64,8 +62,8 @@ export const InterviewHistoryPage: React.FC = () => {
     });
 
   const getScoreBadge = (score: number) => {
-    if (score >= 85) return 'bg-green-50 text-green-700 border-green-200';
-    if (score >= 70) return 'bg-brand-50 text-brand-700 border-brand-200';
+    if (score >= 85) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (score >= 70) return 'bg-blue-50 text-[#2563EB] border-blue-200';
     return 'bg-amber-50 text-amber-700 border-amber-200';
   };
 
@@ -73,7 +71,7 @@ export const InterviewHistoryPage: React.FC = () => {
     return (
       <AppLayout title="Practice History">
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 text-brand-600 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#111111] animate-spin" />
         </div>
       </AppLayout>
     );
@@ -82,57 +80,58 @@ export const InterviewHistoryPage: React.FC = () => {
   return (
     <AppLayout title="Practice History" subtitle="Review past mock interview sessions and coding test performance">
       <div className="space-y-6 max-w-6xl mx-auto">
+        
         {/* Main Tab Switcher */}
-        <div className="flex border-b border-gray-200 bg-white rounded-2xl p-1.5 border shadow-2xs gap-2">
+        <div className="flex border border-[#E5E5E5] bg-white rounded-2xl p-1.5 shadow-2xs gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('interviews')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
               activeTab === 'interviews'
-                ? 'bg-brand-600 text-white shadow-2xs'
-                : 'text-gray-600 hover:bg-gray-50'
+                ? 'bg-[#111111] text-white shadow-2xs'
+                : 'text-[#666666] hover:bg-[#FAFAFA]'
             }`}
           >
-            <Video className="w-4 h-4" /> AI Mock Interviews ({interviews.length})
+            <Video className="w-3.5 h-3.5" /> AI Mock Interviews ({interviews.length})
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('coding')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
               activeTab === 'coding'
-                ? 'bg-brand-600 text-white shadow-2xs'
-                : 'text-gray-600 hover:bg-gray-50'
+                ? 'bg-[#111111] text-white shadow-2xs'
+                : 'text-[#666666] hover:bg-[#FAFAFA]'
             }`}
           >
-            <Code className="w-4 h-4" /> Coding Challenges ({codingTests.length})
+            <Code className="w-3.5 h-3.5" /> Coding Challenges ({codingTests.length})
           </button>
         </div>
 
         {activeTab === 'interviews' ? (
           <>
             {/* Search & Filter Controls Header */}
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="relative w-full md:w-72">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search history by title or type..."
-                  className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                 />
               </div>
 
               <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
                 {/* Filter Pills */}
-                <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+                <div className="flex items-center gap-1 bg-[#F5F5F5] p-1 rounded-xl text-xs font-medium border border-[#E5E5E5]">
                   {['All', 'Technical', 'HR', 'Behavioral', 'Project', 'Mixed'].map((t) => (
                     <button
                       key={t}
                       onClick={() => setSelectedType(t)}
-                      className={`px-3 py-1.5 rounded-lg transition ${
-                        selectedType === t ? 'bg-white text-brand-600 shadow-xs' : 'text-gray-600 hover:text-gray-900'
+                      className={`px-3 py-1 rounded-lg transition-colors ${
+                        selectedType === t ? 'bg-white text-[#111111] font-bold shadow-2xs' : 'text-[#666666] hover:text-[#111111]'
                       }`}
                     >
                       {t}
@@ -144,7 +143,7 @@ export const InterviewHistoryPage: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold text-gray-700 outline-none"
+                  className="px-3 py-2 rounded-xl border border-[#E5E5E5] text-xs font-semibold text-[#111111] outline-none"
                 >
                   <option value="date">Sort by Date</option>
                   <option value="score">Sort by Score</option>
@@ -153,11 +152,11 @@ export const InterviewHistoryPage: React.FC = () => {
             </div>
 
             {/* History Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
+            <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-2xs overflow-hidden">
               {filteredInterviews.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-gray-600">
-                    <thead className="bg-gray-50 text-gray-400 font-semibold uppercase tracking-wider border-b border-gray-100">
+                  <table className="w-full text-left text-xs text-[#666666]">
+                    <thead className="bg-[#FAFAFA] text-[#111111] font-mono uppercase tracking-wider border-b border-[#E5E5E5]">
                       <tr>
                         <th className="py-3.5 px-5">Session Title</th>
                         <th className="py-3.5 px-5">Type</th>
@@ -168,27 +167,27 @@ export const InterviewHistoryPage: React.FC = () => {
                         <th className="py-3.5 px-5 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-[#E5E5E5]">
                       {filteredInterviews.map((inv) => (
-                        <tr key={inv.id} className="hover:bg-gray-50/50 transition">
-                          <td className="py-4 px-5 font-bold text-gray-900">{inv.title}</td>
-                          <td className="py-4 px-5 font-semibold text-brand-600">{inv.type}</td>
+                        <tr key={inv.id} className="hover:bg-[#FAFAFA] transition-colors">
+                          <td className="py-4 px-5 font-bold text-[#111111]">{inv.title}</td>
+                          <td className="py-4 px-5 font-medium text-[#2563EB]">{inv.type}</td>
                           <td className="py-4 px-5">
-                            <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded font-medium text-[11px]">
+                            <span className="bg-[#F5F5F5] text-[#111111] px-2.5 py-0.5 rounded font-mono text-[10px] border border-[#E5E5E5]">
                               {inv.difficulty}
                             </span>
                           </td>
-                          <td className="py-4 px-5 text-gray-500">{new Date(inv.createdAt).toLocaleDateString()}</td>
-                          <td className="py-4 px-5 text-gray-500">{Math.round(inv.durationSec / 60)} mins</td>
+                          <td className="py-4 px-5 text-[#666666]">{new Date(inv.createdAt).toLocaleDateString()}</td>
+                          <td className="py-4 px-5 text-[#666666]">{Math.round(inv.durationSec / 60)} mins</td>
                           <td className="py-4 px-5">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${getScoreBadge(inv.overallScore)}`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${getScoreBadge(inv.overallScore)}`}>
                               {Math.round(inv.overallScore)}/100
                             </span>
                           </td>
                           <td className="py-4 px-5 text-right">
                             <Link
                               to={inv.status === 'completed' ? `/interviews/${inv.id}/results` : `/interview/${inv.id}`}
-                              className="text-brand-600 hover:text-brand-700 font-bold hover:underline inline-flex items-center gap-1"
+                              className="text-[#2563EB] font-semibold hover:underline inline-flex items-center gap-1"
                             >
                               {inv.status === 'completed' ? 'View Report' : 'Continue'} <ChevronRight className="w-3.5 h-3.5" />
                             </Link>
@@ -199,11 +198,11 @@ export const InterviewHistoryPage: React.FC = () => {
                   </table>
                 </div>
               ) : (
-                <div className="py-16 text-center space-y-3">
-                  <FileText className="w-10 h-10 text-gray-300 mx-auto" />
-                  <p className="text-sm font-semibold text-gray-700">No matching interview sessions found.</p>
-                  <Link to="/interview/setup" className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:underline">
-                    <Video className="w-4 h-4" /> Start a New Interview
+                <div className="py-16 text-center space-y-3 bg-[#FAFAFA]">
+                  <FileText className="w-8 h-8 text-gray-400 mx-auto" />
+                  <p className="text-xs font-semibold text-[#111111]">No matching interview sessions found.</p>
+                  <Link to="/interview/setup" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:underline">
+                    <Video className="w-3.5 h-3.5" /> Start a New Interview
                   </Link>
                 </div>
               )}
@@ -211,11 +210,11 @@ export const InterviewHistoryPage: React.FC = () => {
           </>
         ) : (
           /* Coding Test History Table */
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-2xs overflow-hidden">
             {codingTests.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-gray-600">
-                  <thead className="bg-gray-50 text-gray-400 font-semibold uppercase tracking-wider border-b border-gray-100">
+                <table className="w-full text-left text-xs text-[#666666]">
+                  <thead className="bg-[#FAFAFA] text-[#111111] font-mono uppercase tracking-wider border-b border-[#E5E5E5]">
                     <tr>
                       <th className="py-3.5 px-5">Test Date</th>
                       <th className="py-3.5 px-5">Language</th>
@@ -226,27 +225,27 @@ export const InterviewHistoryPage: React.FC = () => {
                       <th className="py-3.5 px-5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#E5E5E5]">
                     {codingTests.map((ct) => (
-                      <tr key={ct.id} className="hover:bg-gray-50/50 transition">
-                        <td className="py-4 px-5 text-gray-700 font-medium">{new Date(ct.createdAt).toLocaleDateString()}</td>
-                        <td className="py-4 px-5 font-bold text-brand-600">{ct.language}</td>
+                      <tr key={ct.id} className="hover:bg-[#FAFAFA] transition-colors">
+                        <td className="py-4 px-5 text-[#111111] font-medium">{new Date(ct.createdAt).toLocaleDateString()}</td>
+                        <td className="py-4 px-5 font-bold text-[#2563EB]">{ct.language}</td>
                         <td className="py-4 px-5">
-                          <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded font-medium text-[11px]">
+                          <span className="bg-[#F5F5F5] text-[#111111] px-2.5 py-0.5 rounded font-mono text-[10px] border border-[#E5E5E5]">
                             {ct.difficulty}
                           </span>
                         </td>
-                        <td className="py-4 px-5 text-gray-700 font-semibold">{ct.totalQuestions} Questions</td>
-                        <td className="py-4 px-5 text-green-700 font-bold">{ct.accuracy}%</td>
+                        <td className="py-4 px-5 text-[#111111] font-semibold">{ct.totalQuestions} Questions</td>
+                        <td className="py-4 px-5 text-emerald-700 font-mono font-bold">{ct.accuracy}%</td>
                         <td className="py-4 px-5">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${getScoreBadge(ct.score)}`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${getScoreBadge(ct.score)}`}>
                             {Math.round(ct.score)}%
                           </span>
                         </td>
                         <td className="py-4 px-5 text-right">
                           <Link
                             to={`/coding/results/${ct.id}`}
-                            className="text-brand-600 hover:text-brand-700 font-bold hover:underline inline-flex items-center gap-1"
+                            className="text-[#2563EB] font-semibold hover:underline inline-flex items-center gap-1"
                           >
                             View Performance <ChevronRight className="w-3.5 h-3.5" />
                           </Link>
@@ -257,16 +256,17 @@ export const InterviewHistoryPage: React.FC = () => {
                 </table>
               </div>
             ) : (
-              <div className="py-16 text-center space-y-3">
-                <Code className="w-10 h-10 text-gray-300 mx-auto" />
-                <p className="text-sm font-semibold text-gray-700">No completed coding tests found.</p>
-                <Link to="/coding/setup" className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:underline">
-                  <Code className="w-4 h-4" /> Take an Optional Coding Test
+              <div className="py-16 text-center space-y-3 bg-[#FAFAFA]">
+                <Code className="w-8 h-8 text-gray-400 mx-auto" />
+                <p className="text-xs font-semibold text-[#111111]">No completed coding tests found.</p>
+                <Link to="/coding/setup" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:underline">
+                  <Code className="w-3.5 h-3.5" /> Take an Optional Coding Test
                 </Link>
               </div>
             )}
           </div>
         )}
+
       </div>
     </AppLayout>
   );

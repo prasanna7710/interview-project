@@ -91,9 +91,10 @@ export const InterviewSetupPage: React.FC = () => {
   return (
     <AppLayout title="Interview Setup" subtitle="Customize your AI mock interview parameters">
       <div className="max-w-4xl mx-auto space-y-6">
+        
         {/* Step 1: Select Interview Type */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-4">
-          <h3 className="text-base font-bold text-gray-900">1. Select Interview Type</h3>
+        <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-4">
+          <h3 className="text-sm font-bold text-[#111111]">1. Select Interview Type</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {types.map((t) => {
               const Icon = t.icon;
@@ -102,20 +103,20 @@ export const InterviewSetupPage: React.FC = () => {
                 <div
                   key={t.id}
                   onClick={() => setType(t.id as any)}
-                  className={`p-4 rounded-xl border cursor-pointer transition space-y-2 ${
+                  className={`p-4 rounded-xl border cursor-pointer transition-all space-y-2 ${
                     isSelected
-                      ? 'border-brand-500 bg-brand-50/40 shadow-xs'
-                      : 'border-gray-200 hover:border-brand-300 bg-white'
+                      ? 'border-[#2563EB] bg-blue-50/30'
+                      : 'border-[#E5E5E5] hover:border-[#111111] bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-[#111111] text-white' : 'bg-[#F5F5F5] text-[#111111]'}`}>
                       <Icon className="w-4 h-4" />
                     </div>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-brand-600" />}
+                    {isSelected && <CheckCircle2 className="w-4 h-4 text-[#2563EB]" />}
                   </div>
-                  <h4 className="text-sm font-bold text-gray-900">{t.title}</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">{t.desc}</p>
+                  <h4 className="text-xs font-bold text-[#111111]">{t.title}</h4>
+                  <p className="text-[11px] text-[#666666] leading-relaxed">{t.desc}</p>
                 </div>
               );
             })}
@@ -125,17 +126,17 @@ export const InterviewSetupPage: React.FC = () => {
         {/* Step 2: Resume Context & Difficulty */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Resume Selection */}
-          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-3">
-            <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-brand-600" /> 2. Resume Context
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-3">
+            <h3 className="text-sm font-bold text-[#111111] flex items-center gap-2">
+              <FileText className="w-4 h-4 text-[#2563EB]" /> 2. Resume Context
             </h3>
             {isLoadingResumes ? (
-              <p className="text-xs text-gray-400">Loading resumes...</p>
+              <p className="text-xs text-[#666666]">Loading resumes...</p>
             ) : resumes.length > 0 ? (
               <select
                 value={selectedResumeId}
                 onChange={(e) => setSelectedResumeId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
               >
                 {resumes.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -151,18 +152,18 @@ export const InterviewSetupPage: React.FC = () => {
           </div>
 
           {/* Difficulty Selection */}
-          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-3">
-            <h3 className="text-base font-bold text-gray-900">3. Difficulty Level</h3>
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-3">
+            <h3 className="text-sm font-bold text-[#111111]">3. Difficulty Level</h3>
             <div className="grid grid-cols-3 gap-2">
               {(['Easy', 'Medium', 'Hard'] as const).map((d) => (
                 <button
                   type="button"
                   key={d}
                   onClick={() => setDifficulty(d)}
-                  className={`py-2.5 px-3 rounded-xl border text-xs font-semibold transition ${
+                  className={`py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all ${
                     difficulty === d
-                      ? 'border-brand-500 bg-brand-600 text-white shadow-xs'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      ? 'border-[#111111] bg-[#111111] text-white shadow-2xs'
+                      : 'border-[#E5E5E5] text-[#111111] hover:bg-[#FAFAFA]'
                   }`}
                 >
                   {d}
@@ -174,18 +175,18 @@ export const InterviewSetupPage: React.FC = () => {
 
         {/* Step 3: Question Count & Mode */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-3">
-            <h3 className="text-base font-bold text-gray-900">4. Number of Questions</h3>
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-3">
+            <h3 className="text-sm font-bold text-[#111111]">4. Number of Questions</h3>
             <div className="grid grid-cols-4 gap-2">
               {[5, 10, 15, 20].map((c) => (
                 <button
                   type="button"
                   key={c}
                   onClick={() => setQuestionCount(c)}
-                  className={`py-2.5 rounded-xl border text-xs font-semibold transition ${
+                  className={`py-2.5 rounded-xl border text-xs font-semibold transition-all ${
                     questionCount === c
-                      ? 'border-brand-500 bg-brand-600 text-white shadow-xs'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      ? 'border-[#111111] bg-[#111111] text-white shadow-2xs'
+                      : 'border-[#E5E5E5] text-[#111111] hover:bg-[#FAFAFA]'
                   }`}
                 >
                   {c} Qs
@@ -194,9 +195,9 @@ export const InterviewSetupPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-3">
-            <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-              <Mic className="w-4 h-4 text-brand-600" /> 5. Interview Mode
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-3">
+            <h3 className="text-sm font-bold text-[#111111] flex items-center gap-2">
+              <Mic className="w-4 h-4 text-[#2563EB]" /> 5. Interview Mode
             </h3>
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -208,10 +209,10 @@ export const InterviewSetupPage: React.FC = () => {
                   type="button"
                   key={m.id}
                   onClick={() => setMode(m.id as any)}
-                  className={`py-2.5 px-2 rounded-xl border text-xs font-semibold transition ${
+                  className={`py-2.5 px-2 rounded-xl border text-xs font-semibold transition-all ${
                     mode === m.id
-                      ? 'border-brand-500 bg-brand-600 text-white shadow-xs'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      ? 'border-[#111111] bg-[#111111] text-white shadow-2xs'
+                      : 'border-[#E5E5E5] text-[#111111] hover:bg-[#FAFAFA]'
                   }`}
                 >
                   {m.label}
@@ -222,32 +223,33 @@ export const InterviewSetupPage: React.FC = () => {
         </div>
 
         {/* Step 4: Summary Card & Confirmation */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-card space-y-4">
-          <h3 className="text-base font-bold text-gray-900">Summary & Launch</h3>
-          <div className="bg-brand-50/50 p-4 rounded-xl border border-brand-100 flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-gray-700">
-            <div><span className="text-gray-400">Type:</span> <strong className="text-gray-900">{type}</strong></div>
-            <div><span className="text-gray-400">Difficulty:</span> <strong className="text-gray-900">{difficulty}</strong></div>
-            <div><span className="text-gray-400">Questions:</span> <strong className="text-gray-900">{questionCount}</strong></div>
-            <div><span className="text-gray-400">Mode:</span> <strong className="text-gray-900">{mode}</strong></div>
+        <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-4">
+          <h3 className="text-sm font-bold text-[#111111]">Summary & Launch</h3>
+          <div className="bg-[#FAFAFA] p-4 rounded-xl border border-[#E5E5E5] flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-[#666666]">
+            <div>Type: <strong className="text-[#111111]">{type}</strong></div>
+            <div>Difficulty: <strong className="text-[#111111]">{difficulty}</strong></div>
+            <div>Questions: <strong className="text-[#111111]">{questionCount}</strong></div>
+            <div>Mode: <strong className="text-[#111111]">{mode}</strong></div>
           </div>
 
           <button
             type="button"
             onClick={handleStartInterview}
             disabled={isCreating}
-            className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition"
+            className="w-full flex items-center justify-center gap-2 bg-[#111111] hover:bg-black disabled:bg-gray-400 text-white py-3 rounded-xl font-bold text-xs shadow-2xs transition-all active:scale-[0.99]"
           >
             {isCreating ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" /> Generating AI Question Set...
+                <Loader2 className="w-4 h-4 animate-spin" /> Generating AI Question Set...
               </>
             ) : (
               <>
-                <Video className="w-5 h-5" /> Start Interview Now <ArrowRight className="w-5 h-5" />
+                <Video className="w-4 h-4" /> Start Interview Now <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </div>
+
       </div>
     </AppLayout>
   );

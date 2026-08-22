@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 export interface ParsedResumeData {
   candidateName?: string;
   email?: string;
@@ -27,40 +29,50 @@ export interface AnswerEvaluationResult {
   feedback: string;
 }
 
-async function callLLM(prompt: string, systemPrompt: string): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY;
+let genAIInstance: GoogleGenerativeAI | null = null;
+let lastApiKey: string | undefined = undefined;
 
-  if (apiKey && apiKey.trim().length > 10) {
+function getGeminiClient(): GoogleGenerativeAI | null {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey.trim().length < 10) {
+    return null;
+  }
+  if (!genAIInstance || lastApiKey !== apiKey) {
+    genAIInstance = new GoogleGenerativeAI(apiKey.trim());
+    lastApiKey = apiKey;
+  }
+  return genAIInstance;
+}
+
+/**
+ * Executes a prompt against Google Gemini API (gemini-1.5-flash) with structured JSON enforcement.
+ * Falls back to intelligent local parser if GEMINI_API_KEY is not configured or in case of API failure.
+ */
+async function callLLM(prompt: string, systemPrompt: string): Promise<string> {
+  const client = getGeminiClient();
+
+  if (client) {
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt },
-          ],
+      const model = client.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
           temperature: 0.2,
-          response_format: { type: 'json_object' },
-        }),
+        },
+        systemInstruction: systemPrompt,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        return data.choices[0].message.content;
-      } else {
-        console.warn('[AI] OpenAI API call failed, using local extraction engine:', await response.text());
+      const response = await model.generateContent(prompt);
+      const text = response.response.text();
+      if (text && text.trim().length > 0) {
+        return text.trim();
       }
-    } catch (err) {
-      console.warn('[AI] OpenAI request error, using local extraction engine:', err);
+    } catch (err: any) {
+      console.warn('[AI] Google Gemini API request failed, using intelligent local engine:', err?.message || err);
     }
   }
 
-  return ''; // Trigger local non-mock extraction engine
+  return ''; // Trigger intelligent local non-mock extraction engine
 }
 
 export async function parseResumeWithAI(rawText: string, resumeId?: string, filename?: string): Promise<ParsedResumeData> {
@@ -108,7 +120,7 @@ Output MUST be a valid JSON object with keys:
         educations: Array.isArray(parsed.education) ? parsed.education : (Array.isArray(parsed.educations) ? parsed.educations : []),
       };
     } catch (e) {
-      console.error('[AI] Failed to parse LLM JSON output for resume analysis, falling back to local extraction.');
+      console.error('[AI] Failed to parse Gemini JSON output for resume analysis, falling back to local extraction.');
       result = smartResumeFallback(rawText);
     }
   } else {
@@ -351,8 +363,8 @@ export async function generateInterviewQuestions(
   resumeData?: ParsedResumeData | null
 ): Promise<GeneratedQuestion[]> {
   const candidateName = resumeData?.candidateName || 'Candidate';
-  const skillsStr = resumeData?.skills.map(s => s.name).join(', ') || 'Software Development';
-  const projectsStr = resumeData?.projects.map(p => `${p.title}: ${p.description}`).join(' | ') || 'Projects listed on resume';
+  const skillsStr = resumeData?.skills?.map(s => s.name).join(', ') || 'Software Development';
+  const projectsStr = resumeData?.projects?.map(p => `${p.title}: ${p.description}`).join(' | ') || 'Projects listed on resume';
 
   const systemPrompt = `You are a top-tier tech interviewer conducting a ${type} interview at ${difficulty} level for candidate ${candidateName}.
 Generate exactly ${count} realistic, professional interview questions based strictly on the candidate's resume content.
@@ -370,7 +382,7 @@ Output MUST be a JSON object with key "questions" containing an array of objects
         return parsed.questions;
       }
     } catch (e) {
-      console.error('[AI] Failed to parse question generation JSON output');
+      console.error('[AI] Failed to parse question generation JSON output from Gemini');
     }
   }
 
@@ -384,7 +396,7 @@ function generateSmartQuestionsFallback(
   resumeData?: ParsedResumeData | null
 ): GeneratedQuestion[] {
   const candidateName = resumeData?.candidateName ? `${resumeData.candidateName}` : 'your background';
-  const skills = resumeData?.skills.map(s => s.name) || [];
+  const skills = resumeData?.skills?.map(s => s.name) || [];
   const projects = resumeData?.projects || [];
 
   const primarySkill = skills[0] || 'software development';
@@ -432,9 +444,9 @@ function generateSmartQuestionsFallback(
       hints: 'Mention CORS, sanitization, JWTs, or encrypted data handling.',
     });
   } else if (type === 'Project') {
-    projects.forEach((p, idx) => {
+    projects.forEach((p) => {
       questions.push({
-        questionText: `For your project "${p.title}", explain your specific individual contributions and technical stack choices (${p.technologies.join(', ') || primarySkill}).`,
+        questionText: `For your project "${p.title}", explain your specific individual contributions and technical stack choices (${p.technologies?.join(', ') || primarySkill}).`,
         category: 'Project Ownership',
         hints: 'Detail specific components or API endpoints you built.',
       });
@@ -590,7 +602,7 @@ Output MUST be valid JSON with keys:
         };
       }
     } catch (e) {
-      console.error('[AI] Failed to parse answer evaluation JSON');
+      console.error('[AI] Failed to parse answer evaluation JSON from Gemini');
     }
   }
 

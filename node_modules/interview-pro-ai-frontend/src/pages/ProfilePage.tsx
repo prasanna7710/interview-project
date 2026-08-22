@@ -18,7 +18,6 @@ import {
   Trash2,
   Camera,
   Upload,
-  Image as ImageIcon,
 } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
@@ -172,7 +171,7 @@ export const ProfilePage: React.FC = () => {
     return (
       <AppLayout title="Candidate Profile">
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 text-brand-600 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#111111] animate-spin" />
         </div>
       </AppLayout>
     );
@@ -181,6 +180,7 @@ export const ProfilePage: React.FC = () => {
   return (
     <AppLayout title="Candidate Profile" subtitle="Manage your professional background and interview context">
       <form onSubmit={handleSave} className="space-y-6">
+        
         {/* Hidden File Input for Avatar */}
         <input
           type="file"
@@ -191,11 +191,11 @@ export const ProfilePage: React.FC = () => {
         />
 
         {/* Top Header Card with Circular Avatar */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-card flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="bg-white rounded-2xl p-6 border border-[#E5E5E5] shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             {/* Circular Profile Avatar */}
             <div className="relative group">
-              <div className="w-24 h-24 rounded-full border-2 border-brand-200 bg-brand-50 text-brand-700 flex items-center justify-center font-bold text-3xl shadow-sm overflow-hidden flex-shrink-0">
+              <div className="w-20 h-20 rounded-full border border-[#E5E5E5] bg-[#111111] text-white flex items-center justify-center font-bold text-2xl shadow-2xs overflow-hidden flex-shrink-0">
                 {photoUrl ? (
                   <img src={photoUrl} alt={fullName} className="w-full h-full object-cover" />
                 ) : (
@@ -208,32 +208,32 @@ export const ProfilePage: React.FC = () => {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={isUploadingPhoto}
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center shadow-md transition border-2 border-white"
+                className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#111111] hover:bg-black text-white flex items-center justify-center shadow-2xs transition-colors border-2 border-white"
                 title="Upload Profile Picture"
               >
                 {isUploadingPhoto ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <Camera className="w-4 h-4" />
+                  <Camera className="w-3.5 h-3.5" />
                 )}
               </button>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{fullName || 'Candidate Name'}</h2>
-              <p className="text-xs text-brand-600 font-semibold">{headline || 'Add Headline'}</p>
-              <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+              <h2 className="text-base font-extrabold text-[#111111]">{fullName || 'Candidate Name'}</h2>
+              <p className="text-xs text-[#2563EB] font-medium">{headline || 'Add Headline'}</p>
+              <p className="text-xs text-[#666666] mt-0.5 flex items-center gap-2">
                 <span>{user?.email}</span>
                 {location && <span>• {location}</span>}
               </p>
 
               {/* Avatar Action Buttons */}
-              <div className="flex items-center gap-2 mt-3">
+              <div className="flex items-center gap-2 mt-2.5">
                 <button
                   type="button"
                   onClick={() => photoInputRef.current?.click()}
                   disabled={isUploadingPhoto}
-                  className="inline-flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold px-3 py-1.5 rounded-lg border border-gray-200 text-xs transition"
+                  className="inline-flex items-center gap-1.5 bg-white hover:bg-gray-50 text-[#111111] font-medium px-3 py-1 rounded-lg border border-[#E5E5E5] text-xs transition-colors"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   {photoUrl ? 'Change Picture' : 'Upload Picture'}
@@ -244,7 +244,7 @@ export const ProfilePage: React.FC = () => {
                     type="button"
                     onClick={handleRemovePhoto}
                     disabled={isUploadingPhoto}
-                    className="inline-flex items-center gap-1 text-red-600 hover:bg-red-50 font-semibold px-2.5 py-1.5 rounded-lg border border-red-200/60 text-xs transition"
+                    className="inline-flex items-center gap-1 text-red-600 hover:bg-red-50 font-medium px-2.5 py-1 rounded-lg border border-red-200 text-xs transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> Remove
                   </button>
@@ -256,9 +256,9 @@ export const ProfilePage: React.FC = () => {
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-semibold px-6 py-2.5 rounded-xl shadow-sm transition text-sm"
+            className="inline-flex items-center gap-2 bg-[#111111] hover:bg-black disabled:bg-gray-400 text-white font-medium px-5 py-2.5 rounded-xl shadow-2xs transition-all text-xs active:scale-[0.99]"
           >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 text-[#2563EB]" />}
             Save Profile
           </button>
         </div>
@@ -267,78 +267,78 @@ export const ProfilePage: React.FC = () => {
           {/* Main Info Left */}
           <div className="lg:col-span-8 space-y-6">
             {/* Basic Information */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-4">
-              <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <User className="w-4 h-4 text-brand-600" /> Basic Information
+            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-4">
+              <h3 className="text-sm font-bold text-[#111111] flex items-center gap-2">
+                <User className="w-4 h-4 text-[#2563EB]" /> Basic Information
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
+                  <label className="block text-xs font-semibold text-[#111111] mb-1">Full Name</label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                    className="w-full px-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Professional Headline</label>
+                  <label className="block text-xs font-semibold text-[#111111] mb-1">Professional Headline</label>
                   <input
                     type="text"
                     value={headline}
                     onChange={(e) => setHeadline(e.target.value)}
                     placeholder="e.g. Software Engineer / Frontend Developer"
-                    className="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                    className="w-full px-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <label className="block text-xs font-semibold text-[#111111] mb-1">Phone Number</label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                    <Phone className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
                     <input
                       type="text"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Location</label>
+                  <label className="block text-xs font-semibold text-[#111111] mb-1">Location</label>
                   <div className="relative">
-                    <MapPin className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                    <MapPin className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
                     <input
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       placeholder="City, Country"
-                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Professional Summary / Bio</label>
+                <label className="block text-xs font-semibold text-[#111111] mb-1">Professional Summary / Bio</label>
                 <textarea
                   rows={4}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Brief summary of your technical background, goals, and core strengths..."
-                  className="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                 />
               </div>
             </div>
 
             {/* Skills Card */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-4">
-              <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <Award className="w-4 h-4 text-brand-600" /> Technical & Soft Skills
+            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-4">
+              <h3 className="text-sm font-bold text-[#111111] flex items-center gap-2">
+                <Award className="w-4 h-4 text-[#2563EB]" /> Technical & Soft Skills
               </h3>
 
               <div className="flex items-center gap-2">
@@ -353,14 +353,14 @@ export const ProfilePage: React.FC = () => {
                     }
                   }}
                   placeholder="Add skill (e.g., React, Python, System Design)..."
-                  className="flex-1 px-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  className="flex-1 px-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                 />
                 <button
                   type="button"
                   onClick={handleAddSkill}
-                  className="inline-flex items-center gap-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold px-4 py-2 rounded-xl border border-brand-200 text-sm transition"
+                  className="inline-flex items-center gap-1.5 bg-[#F5F5F5] hover:bg-gray-100 text-[#111111] font-medium px-4 py-2 rounded-xl border border-[#E5E5E5] text-xs transition-colors"
                 >
-                  <Plus className="w-4 h-4" /> Add
+                  <Plus className="w-3.5 h-3.5 text-[#2563EB]" /> Add
                 </button>
               </div>
 
@@ -368,15 +368,15 @@ export const ProfilePage: React.FC = () => {
                 {skills.map((skill) => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-lg"
+                    className="inline-flex items-center gap-1.5 bg-[#F5F5F5] border border-[#E5E5E5] text-[#111111] text-xs font-mono font-medium px-2.5 py-1 rounded-md"
                   >
                     {skill}
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(skill)}
-                      className="text-gray-400 hover:text-red-600 transition"
+                      className="text-gray-400 hover:text-red-600 transition-colors"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </span>
                 ))}
@@ -386,59 +386,59 @@ export const ProfilePage: React.FC = () => {
 
           {/* Social Links Right */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-4">
-              <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <Globe className="w-4 h-4 text-brand-600" /> Online Profiles & Links
+            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-4">
+              <h3 className="text-sm font-bold text-[#111111] flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[#2563EB]" /> Online Profiles & Links
               </h3>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">LinkedIn URL</label>
+                  <label className="block text-xs font-semibold text-[#111111] mb-1">LinkedIn URL</label>
                   <div className="relative">
-                    <Linkedin className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                    <Linkedin className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
                     <input
                       type="url"
                       value={linkedinUrl}
                       onChange={(e) => setLinkedinUrl(e.target.value)}
                       placeholder="https://linkedin.com/in/username"
-                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">GitHub URL</label>
+                  <label className="block text-xs font-semibold text-[#111111] mb-1">GitHub URL</label>
                   <div className="relative">
-                    <Github className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                    <Github className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
                     <input
                       type="url"
                       value={githubUrl}
                       onChange={(e) => setGithubUrl(e.target.value)}
                       placeholder="https://github.com/username"
-                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Portfolio / Website</label>
+                  <label className="block text-xs font-semibold text-[#111111] mb-1">Portfolio / Website</label>
                   <div className="relative">
-                    <Globe className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                    <Globe className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
                     <input
                       type="url"
                       value={portfolioUrl}
                       onChange={(e) => setPortfolioUrl(e.target.value)}
                       placeholder="https://yourportfolio.com"
-                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                      className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-[#E5E5E5] text-xs outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-brand-50/60 p-5 rounded-2xl border border-brand-100 space-y-2">
-              <h4 className="text-xs font-bold text-brand-700 uppercase tracking-wider">AI Context Note</h4>
-              <p className="text-xs text-brand-900 leading-relaxed">
+            <div className="bg-[#FAFAFA] p-5 rounded-2xl border border-[#E5E5E5] space-y-1.5">
+              <h4 className="text-[10px] font-mono font-bold text-[#2563EB] uppercase tracking-wider">AI Context Note</h4>
+              <p className="text-xs text-[#666666] leading-relaxed">
                 Your profile picture and background information automatically sync across all your interview sessions and user dashboard.
               </p>
             </div>

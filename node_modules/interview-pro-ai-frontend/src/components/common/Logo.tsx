@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bot, Sparkles } from 'lucide-react';
+import { Terminal } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -8,27 +8,29 @@ interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true }) => {
   const iconSizes = {
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-10 h-10',
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6',
   };
 
   const textSizes = {
-    sm: 'text-lg',
-    md: 'text-xl',
-    lg: 'text-2xl',
+    sm: 'text-base',
+    md: 'text-lg',
+    lg: 'text-xl',
   };
 
   return (
-    <div className="flex items-center gap-2.5 select-none">
-      <div className="relative flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white p-2 shadow-sm">
-        <Bot className={iconSizes[size]} />
-        <Sparkles className="w-3 h-3 text-amber-300 absolute -top-1 -right-1" />
+    <div className="flex items-center gap-2 select-none group">
+      <div className="flex items-center justify-center rounded-lg bg-[#111111] text-white p-1.5 border border-[#222222] shadow-2xs group-hover:bg-black transition-colors">
+        <Terminal className={iconSizes[size]} />
       </div>
       {showText && (
-        <div className="flex flex-col">
-          <span className={`font-bold tracking-tight text-gray-900 ${textSizes[size]}`}>
-            Interview<span className="text-brand-600">Pro</span> <span className="text-xs bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded font-semibold border border-brand-200 uppercase tracking-wider ml-0.5">AI</span>
+        <div className="flex items-center gap-1.5">
+          <span className={`font-bold tracking-tight text-[#111111] ${textSizes[size]}`}>
+            Interview<span className="text-[#2563EB]">Pro</span>
+          </span>
+          <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+            AI
           </span>
         </div>
       )}

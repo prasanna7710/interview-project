@@ -42,7 +42,7 @@ export const RegisterPage: React.FC = () => {
     try {
       const res = await api.post('/auth/register', { fullName, email, password });
       login(res.data.token, res.data.user);
-      showToast('Account created successfully! Welcome to Interview Pro AI.', 'success');
+      showToast('Account created successfully! Welcome to InterviewPro.', 'success');
       navigate('/resume');
     } catch (err: any) {
       const msg = err.response?.data?.error || 'Registration failed. Email might already exist.';
@@ -54,22 +54,22 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F7FF] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FAFAFA] flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-[#111111] font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3">
         <Link to="/" className="inline-block">
           <Logo size="lg" />
         </Link>
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Create your account</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="text-2xl font-extrabold text-[#111111] tracking-tight">Create your account</h2>
+        <p className="text-xs text-[#666666]">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link to="/login" className="font-semibold text-[#2563EB] hover:underline">
             Sign in here
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 sm:px-10 rounded-2xl border border-gray-200 shadow-card space-y-6">
+        <div className="bg-white py-8 px-6 sm:px-8 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-6">
           {errorMsg && (
             <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-medium text-red-700">
               {errorMsg}
@@ -78,7 +78,7 @@ export const RegisterPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Full Name</label>
+              <label className="block text-xs font-semibold text-[#111111] mb-1.5">Full Name</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <User className="w-4 h-4" />
@@ -89,13 +89,13 @@ export const RegisterPage: React.FC = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Alex Johnson"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-sm outline-none transition"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#E5E5E5] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] text-xs outline-none transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email Address</label>
+              <label className="block text-xs font-semibold text-[#111111] mb-1.5">Email Address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <Mail className="w-4 h-4" />
@@ -106,13 +106,13 @@ export const RegisterPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@example.com"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-sm outline-none transition"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#E5E5E5] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] text-xs outline-none transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Password</label>
+              <label className="block text-xs font-semibold text-[#111111] mb-1.5">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <Lock className="w-4 h-4" />
@@ -123,13 +123,13 @@ export const RegisterPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-sm outline-none transition"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#E5E5E5] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] text-xs outline-none transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Confirm Password</label>
+              <label className="block text-xs font-semibold text-[#111111] mb-1.5">Confirm Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <Lock className="w-4 h-4" />
@@ -140,7 +140,7 @@ export const RegisterPage: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat password"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-sm outline-none transition"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#E5E5E5] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] text-xs outline-none transition-colors"
                 />
               </div>
             </div>
@@ -148,7 +148,7 @@ export const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white py-3 rounded-xl font-semibold text-sm transition shadow-sm"
+              className="w-full flex items-center justify-center gap-2 bg-[#111111] hover:bg-black disabled:bg-gray-400 text-white py-2.5 rounded-xl font-medium text-xs transition-all shadow-2xs active:scale-[0.99]"
             >
               {isSubmitting ? (
                 <>
@@ -156,7 +156,7 @@ export const RegisterPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  Create Account <ArrowRight className="w-4 h-4" />
+                  Create Account <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
             </button>
@@ -164,13 +164,13 @@ export const RegisterPage: React.FC = () => {
 
           <GoogleAuthButton label="Sign up with Google" redirectTo="/resume" />
 
-          <div className="space-y-2 pt-2 text-xs text-gray-500 border-t border-gray-100">
+          <div className="space-y-2 pt-3 border-t border-[#E5E5E5] text-xs text-[#666666]">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
               <span>Resume analysis & personalized question engine included</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
               <span>Voice speech-to-text & interviewer voice enabled</span>
             </div>
           </div>

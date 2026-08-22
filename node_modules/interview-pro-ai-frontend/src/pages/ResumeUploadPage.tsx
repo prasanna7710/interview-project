@@ -6,7 +6,6 @@ import { api } from '../services/api';
 import {
   UploadCloud,
   FileText,
-  CheckCircle2,
   X,
   Sparkles,
   AlertCircle,
@@ -110,10 +109,11 @@ export const ResumeUploadPage: React.FC = () => {
   return (
     <AppLayout title="Upload Resume" subtitle="Upload your resume to extract skills and generate personalized questions">
       <div className="max-w-3xl mx-auto space-y-6">
+        
         {/* Instruction Header */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs space-y-2 text-center sm:text-left">
-          <h2 className="text-xl font-bold text-gray-900">Upload Your Professional Resume</h2>
-          <p className="text-xs text-gray-600 leading-relaxed">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-2 text-center sm:text-left">
+          <h2 className="text-xl font-extrabold text-[#111111] tracking-tight">Upload Your Professional Resume</h2>
+          <p className="text-xs text-[#666666] leading-relaxed">
             Our AI parser will analyze your skills, work experience, education, and technical projects to generate tailored interview questions.
           </p>
         </div>
@@ -123,8 +123,8 @@ export const ResumeUploadPage: React.FC = () => {
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition flex flex-col items-center justify-center gap-4 bg-white ${
-            selectedFile ? 'border-brand-500 bg-brand-50/20' : 'border-gray-300 hover:border-brand-400 hover:bg-gray-50/50'
+          className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-4 bg-white ${
+            selectedFile ? 'border-[#2563EB] bg-blue-50/20' : 'border-[#E5E5E5] hover:border-[#111111] hover:bg-[#FAFAFA]'
           }`}
         >
           <input
@@ -135,29 +135,29 @@ export const ResumeUploadPage: React.FC = () => {
             className="hidden"
           />
 
-          <div className="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center shadow-2xs">
-            <UploadCloud className="w-8 h-8" />
+          <div className="w-14 h-14 rounded-2xl bg-[#F5F5F5] text-[#111111] border border-[#E5E5E5] flex items-center justify-center">
+            <UploadCloud className="w-7 h-7" />
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-900">
-              Drag & drop your resume here, or <span className="text-brand-600 underline">browse files</span>
+            <p className="text-xs sm:text-sm font-semibold text-[#111111]">
+              Drag & drop your resume here, or <span className="text-[#2563EB] underline">browse files</span>
             </p>
-            <p className="text-xs text-gray-500">Supports PDF and DOCX files up to 10 MB</p>
+            <p className="text-[11px] text-[#666666]">Supports PDF and DOCX files up to 10 MB</p>
           </div>
         </div>
 
         {/* Selected File Details Box */}
         {selectedFile && (
-          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-2xs space-y-4">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E5E5E5] shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-brand-50 text-brand-600 rounded-xl border border-brand-100">
-                  <FileText className="w-6 h-6" />
+                <div className="p-2.5 bg-[#F5F5F5] text-[#111111] rounded-xl border border-[#E5E5E5]">
+                  <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 truncate max-w-xs">{selectedFile.name}</h4>
-                  <p className="text-xs text-gray-500">
+                  <h4 className="text-xs sm:text-sm font-bold text-[#111111] truncate max-w-xs">{selectedFile.name}</h4>
+                  <p className="text-[11px] text-[#666666]">
                     {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {selectedFile.name.split('.').pop()?.toUpperCase()}
                   </p>
                 </div>
@@ -170,9 +170,9 @@ export const ResumeUploadPage: React.FC = () => {
                     e.stopPropagation();
                     setSelectedFile(null);
                   }}
-                  className="text-gray-400 hover:text-red-600 p-1.5 rounded-lg transition"
+                  className="text-gray-400 hover:text-red-600 p-1.5 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -187,17 +187,17 @@ export const ResumeUploadPage: React.FC = () => {
 
             {/* Progress / Status Indicators */}
             {(isUploading || isAnalyzing) && (
-              <div className="space-y-2 bg-brand-50/60 p-4 rounded-xl border border-brand-100">
-                <div className="flex items-center justify-between text-xs font-semibold text-brand-700">
+              <div className="space-y-2 bg-[#FAFAFA] p-4 rounded-xl border border-[#E5E5E5]">
+                <div className="flex items-center justify-between text-xs font-medium text-[#111111]">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-brand-600" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#2563EB]" />
                     {statusText}
                   </span>
-                  <span>{progressPercent}%</span>
+                  <span className="font-mono">{progressPercent}%</span>
                 </div>
-                <div className="w-full bg-brand-200 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-[#E5E5E5] h-1.5 rounded-full overflow-hidden">
                   <div
-                    className="bg-brand-600 h-full transition-all duration-500"
+                    className="bg-[#2563EB] h-full transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -209,13 +209,14 @@ export const ResumeUploadPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleUploadAndAnalyze}
-                className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl shadow-sm transition text-sm"
+                className="w-full flex items-center justify-center gap-2 bg-[#111111] hover:bg-black text-white font-medium py-2.5 rounded-xl transition-all shadow-2xs text-xs active:scale-[0.99]"
               >
-                <Sparkles className="w-4 h-4" /> Analyze Resume with AI <ArrowRight className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-[#2563EB]" /> Analyze Resume with AI <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
         )}
+
       </div>
     </AppLayout>
   );
